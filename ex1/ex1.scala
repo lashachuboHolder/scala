@@ -45,21 +45,12 @@ case class TripReport(
 
 // 2
 def parseTrip(raw: RawTrip): Option[Trip] =
-//  val fields = raw.data.split(",").trim(" ")
-//   val id = Try(fields[0].toInt).toOption
-//   val pickup_time = fields[1]
-//   val distance_km = Try(fields[2].toDouble).toOption
-//   val fare_ammount = Try(fields[3].toDouble).toOption
-
   val fields = raw.data.split(",").map(_.trim)
   for
     id <- Try(fields(0).toInt).toOption
     distance <- Try(fields(2).toDouble).toOption
     fare <- Try(fields(3).toDouble).toOption
   yield Trip(id, fields(1), distance, fare)
-
-
-// fuck this language
 
 
 // 3
