@@ -26,6 +26,7 @@ val rawTrips = List(
 )
 
 
+// 1
 case class RawTrip(data: String)
 
 case class Trip(
@@ -42,6 +43,7 @@ case class TripReport(
   label: String
 )
 
+// 2
 def parseTrip(raw: RawTrip): Option[Trip] =
   val fields = raw.data.split(",").trim(" ")
   val id = Try(fields[0].toInt).toOption
@@ -51,3 +53,20 @@ def parseTrip(raw: RawTrip): Option[Trip] =
 
 
 // fuck this language
+
+
+// 3
+def distanceAbove(min: Double)(t: Trip): Boolean = t.distanceKm >= min
+def fareAbove(min: Double)(t: Trip): Boolean = t.fare >= min
+
+
+// 4
+val applyFuelSurcharge: Trip => Trip = t => t.copy(fare = t.fare * 1.10)
+val applyCityTax: Trip => Trip = t => t.copy(fare = t.fare * 0.95)
+
+
+// 5
+def labelByDistance(threshold: Double, longLabel: String, shortLabel: String)(t: Trip): String = 
+if (t.distanceKm >= threshold) longLabel else shortLabel
+
+val labelTrip = labelByDistance(10, "LongTrip", "ShortTrip")
