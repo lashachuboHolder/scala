@@ -45,11 +45,18 @@ case class TripReport(
 
 // 2
 def parseTrip(raw: RawTrip): Option[Trip] =
-  val fields = raw.data.split(",").trim(" ")
-  val id = Try(fields[0].toInt).toOption
-  val pickup_time = fields[1]
-  val distance_km = Try(fields[2].toDouble).toOption
-  val fare_ammount = Try(fields[3].toDouble).toOption
+//  val fields = raw.data.split(",").trim(" ")
+//   val id = Try(fields[0].toInt).toOption
+//   val pickup_time = fields[1]
+//   val distance_km = Try(fields[2].toDouble).toOption
+//   val fare_ammount = Try(fields[3].toDouble).toOption
+
+  val fields = raw.data.split(",").map(_.trim)
+  for
+    id <- Try(fields(0).toInt).toOption
+    distance <- Try(fields(2).toDouble).toOption
+    fare <- Try(fields(3).toDouble).toOption
+  yield Trip(id, fields(1), distance, fare)
 
 
 // fuck this language
@@ -70,3 +77,36 @@ def labelByDistance(threshold: Double, longLabel: String, shortLabel: String)(t:
 if (t.distanceKm >= threshold) longLabel else shortLabel
 
 val labelTrip = labelByDistance(10, "LongTrip", "ShortTrip")
+
+
+// 6
+val toReport: Trip => TripReport = t =>
+  TripReport(
+    id = t.id,
+    distanceKm = t.distanceKm,
+    finalFare = t.fare,
+    label = labelTrip(t)
+  )
+
+
+//7
+val enrichTrip: Trip => Trip = applyFuelSurcharge andThen applyCityTax
+val processTrip: Trip => TripReport = enrichTrip andThen toReport
+
+
+// 8
+val reports: List[TripReport] =
+  rawTrips
+    .map(s => RawTrip(s))
+    .flatMap(parseTrip)
+    .filter(distanceAbove(5))
+    .filter(fareAbove(10))
+    .map(processTrip)
+
+
+// 9
+@main def run(): Unit =
+  println("TripID | Distance | FinalFare | Label")
+  for (r <- reports){
+    println(f"${r.id} | ${r.distanceKm} | ${r.finalFare}%.2f | ${r.label}")
+  }
